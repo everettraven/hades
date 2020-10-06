@@ -7,3 +7,6 @@ This tool is still in the very early stages of development, usage documentation 
 # Contributing
 This tool is still in the very early stages of development, contributing documentation will be added shortly.
 
+# License
+
+This project uses the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
