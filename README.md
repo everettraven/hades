@@ -11,7 +11,7 @@ This tool is still in the very early stages of development.
 Build instructions to come shortly.
 
 # Contributing
-Contributing documentation will be added shortly.
+Thank you for your interest in contributing to hades! Take a look at the CONTRIBUTING.md to see how to contribute.
 
 # License
-This project uses the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+This project uses the [Apache License, Version 2](https://opensource.org/licenses/Apache-2.0).
