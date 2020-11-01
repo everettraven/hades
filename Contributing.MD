@@ -16,7 +16,14 @@ Now that you have both Docker and Go, you need to fork the hades repository. Thi
 Now that you have your own fork of hades, it is time to clone the repository to your local filesystem so you can make changes. Make sure to change directories to where you want the repository to exist on your filesystem and then run `git clone <repository-link>` to clone your repository.
 
 ## Start Developing
-Now that you have everything cloned and set up, you can start developing any features, tests, or components you think would improve this project. Whenever you are developing any new features, be sure that a test exists for that feature or that you are creating a test before the development of that feature. hades follows the test driven development workflow which means a feature shouldn't be developed before the test. Before your contribution is accepted it will have to have passed all the tests corresponding to that feature, so make sure to run the tests before committing your changes!
+Now that you have everything cloned and set up, you can start developing any features, tests, or components you think would improve this project. Whenever you are developing any new features, be sure that a test exists for that feature or that you are creating a test before the development of that feature. hades follows the test driven development workflow which means a feature shouldn't be developed before the test. 
+
+## Run Tests
+Before your contribution is accepted it will have to have passed all the tests corresponding to that feature, so make sure to run the tests before committing your changes! The tests can be run with:
+```
+go run run_tests.go
+```
+
 
 ## Make a Pull Request
 Now that you have finished your contribution, it is time to make a Pull Request. When making your PR make sure to follow the template to describe what type of changes you made and the reason for these changes.
