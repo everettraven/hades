@@ -9,8 +9,8 @@ import (
 )
 
 type Command struct {
-	Name           string
-	Arguments      []string
+	Name           string   `hcl:"name"`
+	Arguments      []string `hcl:"args"`
 	Cmd            *exec.Cmd
 	Stdout, Stderr bytes.Buffer
 	ExitStatus     int
