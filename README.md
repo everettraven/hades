@@ -14,4 +14,4 @@ Build instructions to come shortly.
 Contributing documentation will be added shortly.
 
 # License
-This project uses the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+This project uses the [Apache License, Version 2](https://opensource.org/licenses/Apache-2.0).
