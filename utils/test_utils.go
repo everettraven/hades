@@ -3,36 +3,44 @@ package utils
 import (
 	"context"
 
+	"io"
+	"io/ioutil"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
 
-// TestUtil is a struct to hold our test data.
-type TestUtil struct {
-	Name           string  `hcl:"name,label"`
-	Image          string  `hcl:"image"`
-	Port           string  `hcl:"port"`
-	ContainerName  string  `hcl:"containerName"`
-	ExpectedOutput string  `hcl:"expectedOutput"`
-	TestCommand    Command `hcl:"command,block"`
+// RunBlock is a struct to hold the data of a run block of a test
+type RunBlock struct {
+	Cmd Command `hcl:"command,block"`
 }
 
-// NewTestUtil Returns a new TestUtil
-func NewTestUtil(name string, image string, port string, containerName string) *TestUtil {
-	testUtil := new(TestUtil)
-	testUtil.Name = name
-	testUtil.Image = image
-	testUtil.Port = port
-	testUtil.ContainerName = containerName
-	return testUtil
+// UnitTestUtil is a struct to hold our test data.
+type UnitTestUtil struct {
+	Name           string   `hcl:"name,label"`
+	Image          string   `hcl:"image"`
+	Port           string   `hcl:"port"`
+	ContainerName  string   `hcl:"containerName"`
+	ExpectedOutput string   `hcl:"expectedOutput"`
+	Run            RunBlock `hcl:"run,block"`
+}
+
+// NewUnitTestUtil Returns a new UnitTestUtil
+func NewUnitTestUtil(name string, image string, port string, containerName string) *UnitTestUtil {
+	UnitTestUtil := new(UnitTestUtil)
+	UnitTestUtil.Name = name
+	UnitTestUtil.Image = image
+	UnitTestUtil.Port = port
+	UnitTestUtil.ContainerName = containerName
+	return UnitTestUtil
 }
 
 // GetImage will get the specified image for the test
-func (test *TestUtil) GetImage() error {
+func (test *UnitTestUtil) GetImage() error {
 	// Get a new client with API Version Negotiation to make sure the client will work even with newest versions of Docker
-	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
 	// Make sure we didn't hit an error
 	if err != nil {
@@ -40,7 +48,11 @@ func (test *TestUtil) GetImage() error {
 	}
 
 	// Pull the Image requested
-	_, err = cli.ImagePull(context.Background(), test.Image, types.ImagePullOptions{})
+	reader, err := cli.ImagePull(context.Background(), test.Image, types.ImagePullOptions{})
+
+	io.Copy(ioutil.Discard, reader)
+
+	defer reader.Close()
 
 	// Make sure we didn't hit an error
 	if err != nil {
@@ -60,7 +72,7 @@ func (test *TestUtil) GetImage() error {
 }
 
 // RunImage runs the pulled test image in a container
-func (test *TestUtil) RunImage() error {
+func (test *UnitTestUtil) RunImage() error {
 	// Get a new client with API Version Negotiation to make sure the client will work even with newest versions of Docker
 	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 
@@ -105,7 +117,7 @@ func (test *TestUtil) RunImage() error {
 }
 
 // StopContainer - Function to stop a test container
-func (test *TestUtil) StopContainer() error {
+func (test *UnitTestUtil) StopContainer() error {
 	// Get a new client with API Version Negotiation to make sure the client will work even with newest versions of Docker
 	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 
@@ -127,7 +139,7 @@ func (test *TestUtil) StopContainer() error {
 }
 
 // RemoveContainer - Function to remove a Docker Container
-func (test *TestUtil) RemoveContainer() error {
+func (test *UnitTestUtil) RemoveContainer() error {
 	// Get a new client with API Version Negotiation to make sure the client will work even with newest versions of Docker
 	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 
@@ -155,7 +167,7 @@ func (test *TestUtil) RemoveContainer() error {
 }
 
 // RemoveImage - Function to remove a Docker Image from the system
-func (test *TestUtil) RemoveImage() error {
+func (test *UnitTestUtil) RemoveImage() error {
 	// Get a new client with API Version Negotiation to make sure the client will work even with newest versions of Docker
 	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 

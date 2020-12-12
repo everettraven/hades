@@ -18,9 +18,9 @@ func main() {
 	}
 
 	// Loop through all the tests we parsed
-	for i := 0; i < len(unitTests.Tests); i++ {
+	for i := 0; i < len(unitTests.UnitTests); i++ {
 		// Get the current test
-		curTest := unitTests.Tests[i]
+		curTest := unitTests.UnitTests[i]
 
 		// Set up some initial variables
 		depFail := false
@@ -58,8 +58,8 @@ func main() {
 		// Don't run this portion if we already have a dependency failure
 		if !depFail {
 			// Attempt to run the "remote" command
-			arguments := strings.Join(curTest.TestCommand.Arguments, " ")
-			command, err := tests.TestRemoteCommand("127.0.0.1", curTest.Port, curTest.TestCommand.Name, arguments)
+			arguments := strings.Join(curTest.Run.Cmd.Arguments, " ")
+			command, err := tests.TestRemoteCommand("127.0.0.1", curTest.Port, curTest.Run.Cmd.Name, arguments)
 
 			// If we encountered any errors lets handle it.
 			if err != nil {

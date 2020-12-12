@@ -15,5 +15,5 @@ require (
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
-	google.golang.org/grpc v1.33.0 // indirect
+	google.golang.org/grpc v1.34.0 // indirect
 )
