@@ -3,6 +3,8 @@ package tests
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/everettraven/hades/utils"
 	"golang.org/x/crypto/ssh"
 )
@@ -29,9 +31,10 @@ func TestRemoteCommand(host string, port string, name string, args ...string) (*
 		User:            "root",
 		Auth:            []ssh.AuthMethod{ssh.Password("root")},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         30 * time.Second,
 	}
 
-	endpoint := host + ":" + port
+	endpoint := fmt.Sprintf("%s:%s", host, port)
 
 	client, err := ssh.Dial("tcp", endpoint, config)
 
