@@ -264,6 +264,7 @@ func (test *UnitTestUtil) SSHDRunning() (bool, error) {
 
 	// Get the details from the previously ran exec command
 	resp, err := cli.ContainerExecAttach(ctx, execID.ID, types.ExecStartCheck{})
+	defer cli.Close()
 
 	// error check
 	if err != nil {
