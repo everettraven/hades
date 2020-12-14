@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"strings"
 
 	"io"
 	"io/ioutil"
@@ -25,6 +26,7 @@ type UnitTestUtil struct {
 	ContainerName  string   `hcl:"containerName"`
 	ExpectedOutput string   `hcl:"expectedOutput"`
 	Run            RunBlock `hcl:"run,block"`
+	ContainerID    string
 }
 
 // NewUnitTestUtil Returns a new UnitTestUtil
@@ -34,6 +36,7 @@ func NewUnitTestUtil(name string, image string, port string, containerName strin
 	UnitTestUtil.Image = image
 	UnitTestUtil.Port = port
 	UnitTestUtil.ContainerName = containerName
+	UnitTestUtil.ContainerID = ""
 	return UnitTestUtil
 }
 
@@ -112,6 +115,16 @@ func (test *UnitTestUtil) RunImage() error {
 		return err
 	}
 
+	test.ContainerID = container.ID
+
+	// Now that the Image is pulled, close out our client
+	err = cli.Close()
+
+	// Make sure we didn't hit an error
+	if err != nil {
+		return err
+	}
+
 	// Made it here so no errors
 	return nil
 }
@@ -131,6 +144,14 @@ func (test *UnitTestUtil) StopContainer() error {
 
 	// Stop the container
 	if err := cli.ContainerStop(ctx, test.ContainerName, nil); err != nil {
+		return err
+	}
+
+	// Now that the Image is pulled, close out our client
+	err = cli.Close()
+
+	// Make sure we didn't hit an error
+	if err != nil {
 		return err
 	}
 
@@ -162,6 +183,14 @@ func (test *UnitTestUtil) RemoveContainer() error {
 		return err
 	}
 
+	// Now that the Image is pulled, close out our client
+	err = cli.Close()
+
+	// Make sure we didn't hit an error
+	if err != nil {
+		return err
+	}
+
 	// If we made it here no errors
 	return nil
 }
@@ -190,6 +219,70 @@ func (test *UnitTestUtil) RemoveImage() error {
 		return err
 	}
 
+	// Now that the Image is pulled, close out our client
+	err = cli.Close()
+
+	// Make sure we didn't hit an error
+	if err != nil {
+		return err
+	}
+
 	// If we made it here there are no errors
 	return nil
+}
+
+//SSHDRunning - Function to check if the container has the SSHD service running
+func (test *UnitTestUtil) SSHDRunning() (bool, error) {
+	// run this in the background
+	ctx := context.Background()
+
+	running := false
+
+	// set up our client
+	cli, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	cmd := []string{"service", "ssh", "status"}
+
+	config := types.ExecConfig{
+		AttachStderr: true,
+		AttachStdout: true,
+		Cmd:          cmd,
+	}
+
+	// Create the exec command and run it
+	execID, err := cli.ContainerExecCreate(ctx, test.ContainerID, config)
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	// Get the details from the previously ran exec command
+	resp, err := cli.ContainerExecAttach(ctx, execID.ID, types.ExecStartCheck{})
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	// get the output from the exec command until we hit a newline character
+	execOut, err := resp.Reader.ReadString('\n')
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	// check if the output contains "is running" to signify that the SSHD service is actually running within the container
+	if strings.Contains(execOut, "is running") {
+		running = true
+	}
+
+	// Return if SSHD is running or not
+	return running, nil
 }

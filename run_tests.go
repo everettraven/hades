@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/everettraven/hades/tests"
 	"github.com/everettraven/hades/utils"
-	"strings"
 )
 
 func main() {
@@ -53,6 +54,29 @@ func main() {
 				// Set that a dependency failed
 				depFail = true
 			}
+		}
+
+		if !depFail {
+			running, err := curTest.SSHDRunning()
+
+			if err != nil {
+				failErr = fmt.Errorf("Encountered an issue while checking status of container %s - %s", curTest.ContainerName, err.Error())
+				depFail = true
+			}
+
+			if !depFail {
+				// Loop and check status of the container (only continue once the status is running)
+				for running != true {
+					running, err = curTest.SSHDRunning()
+
+					if err != nil {
+						failErr = fmt.Errorf("Encountered an issue while checking status of container %s - %s", curTest.ContainerName, err.Error())
+						depFail = true
+						break
+					}
+				}
+			}
+
 		}
 
 		// Don't run this portion if we already have a dependency failure
