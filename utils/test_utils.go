@@ -15,18 +15,17 @@ import (
 
 // RunBlock is a struct to hold the data of a run block of a test
 type RunBlock struct {
-	Cmd Command `hcl:"command,block"`
+	Cmd []Command `hcl:"command,block"`
 }
 
 // UnitTestUtil is a struct to hold our test data.
 type UnitTestUtil struct {
-	Name           string   `hcl:"name,label"`
-	Image          string   `hcl:"image"`
-	Port           string   `hcl:"port"`
-	ContainerName  string   `hcl:"containerName"`
-	ExpectedOutput string   `hcl:"expectedOutput"`
-	Run            RunBlock `hcl:"run,block"`
-	ContainerID    string
+	Name          string   `hcl:"name,label"`
+	Image         string   `hcl:"image"`
+	Port          string   `hcl:"port"`
+	ContainerName string   `hcl:"containerName"`
+	Run           RunBlock `hcl:"run,block"`
+	ContainerID   string
 }
 
 // NewUnitTestUtil Returns a new UnitTestUtil
