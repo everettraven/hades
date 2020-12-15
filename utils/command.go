@@ -8,14 +8,17 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+//Command - Struct to hold the command block from the HCL Parsing
 type Command struct {
 	Name           string   `hcl:"name"`
 	Arguments      []string `hcl:"args"`
+	ExpectedOutput string   `hcl:"expectedOutput"`
 	Cmd            *exec.Cmd
 	Stdout, Stderr bytes.Buffer
 	ExitStatus     int
 }
 
+//NewCommand - Function to initialize a new command
 func NewCommand(name string, args ...string) *Command {
 	command := new(Command)
 	command.Name = name
@@ -24,6 +27,7 @@ func NewCommand(name string, args ...string) *Command {
 	return command
 }
 
+//RunLocal - Function to run a command locally
 func (c *Command) RunLocal() error {
 	c.Cmd.Stdout = &c.Stdout
 	c.Cmd.Stderr = &c.Stderr
@@ -43,6 +47,7 @@ func (c *Command) RunLocal() error {
 	return nil
 }
 
+//RunRemote - Function to run a command on a remote system
 func (c *Command) RunRemote(client *ssh.Client) error {
 	session, err := client.NewSession()
 	if err != nil {
