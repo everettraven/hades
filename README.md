@@ -11,7 +11,7 @@ This tool is still in the very early stages of development.
 Build instructions to come shortly.
 
 # Contributing
-Thank you for your interest in contributing to hades! Take a look at the [contributing guidelines](.github/Contributing.md) to see how to contribute.
+Thank you for your interest in contributing to hades! Take a look at the [contributing guidelines](.github/Contributing.MD) to see how to contribute.
 
 # License
 This project uses the [Apache License, Version 2](https://opensource.org/licenses/Apache-2.0).
