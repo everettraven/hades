@@ -15,7 +15,8 @@ import (
 
 // RunBlock is a struct to hold the data of a run block of a test
 type RunBlock struct {
-	Cmd []Command `hcl:"command,block"`
+	Cmd []*Command `hcl:"command,block"`
+	Os	*OS	`hcl:"os,block"`
 }
 
 // UnitTestUtil is a struct to hold our test data.

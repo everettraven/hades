@@ -17,3 +17,17 @@ unittest "SSH Command Test" {
         }
     }
 }
+
+unittest "SSH Command Test 2" {
+    image = "bpalmer/ssh_test"
+    port = "9090"
+    containerName = "hades-ssh-test"
+
+    run {
+        command {
+            name = "echo"
+            args = ["World Hello!"]
+            expectedOutput = "World Hello!"
+        }
+    }
+}
