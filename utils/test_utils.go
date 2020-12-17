@@ -11,12 +11,19 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/everettraven/hades/resources"
 )
+
+//Command - get the Command type from resources
+type Command resources.Command
+
+//OS - get the OS type from resources
+type OS resources.OS
 
 // RunBlock is a struct to hold the data of a run block of a test
 type RunBlock struct {
 	Cmd []*Command `hcl:"command,block"`
-	Os	*OS	`hcl:"os,block"`
+	Os  *OS        `hcl:"os,block"`
 }
 
 // UnitTestUtil is a struct to hold our test data.
