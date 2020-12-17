@@ -1,7 +1,7 @@
-unittest "SSH Command Test" {
+unittest "Command Test" {
     image = "bpalmer/ssh_test"
     port = "9090"
-    containerName = "hades-ssh-test"
+    containerName = "hades-command-test"
 
     run {
         command {
@@ -18,10 +18,10 @@ unittest "SSH Command Test" {
     }
 }
 
-unittest "SSH Command Test 2" {
+unittest "Command Test 2" {
     image = "bpalmer/ssh_test"
     port = "9090"
-    containerName = "hades-ssh-test"
+    containerName = "hades-command-test"
 
     run {
         command {

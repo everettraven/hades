@@ -1,15 +1,16 @@
-package utils
+package resources
 
 import (
-	"golang.org/x/crypto/ssh"
-	"fmt"
 	"errors"
+	"fmt"
 	"strings"
+
+	"golang.org/x/crypto/ssh"
 )
 
 type OS struct {
 	DistributionID string `hcl:"distributionID"`
-	Version	string	`hcl:"version,optional"`
+	Version        string `hcl:"version,optional"`
 }
 
 //GetRemoteOS - Function to determine the operating system of the remote system

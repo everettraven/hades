@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/everettraven/hades/utils"
+	"github.com/everettraven/hades/resources"
 	"golang.org/x/crypto/ssh"
 )
 
 // TestLocalCommand - Function for testing execution of a local command
-func TestLocalCommand(name string, args ...string) *utils.Command {
-	command := utils.NewCommand(name, args...)
+func TestLocalCommand(name string, args ...string) *resources.Command {
+	command := resources.NewCommand(name, args...)
 
 	err := command.RunLocal()
 	if err != nil {
@@ -24,8 +24,8 @@ func TestLocalCommand(name string, args ...string) *utils.Command {
 }
 
 // TestRemoteCommand - Function for testing execution of a remote command
-func TestRemoteCommand(host string, port string, name string, args ...string) (*utils.Command, error) {
-	command := utils.NewCommand(name, args...)
+func TestRemoteCommand(host string, port string, name string, args ...string) (*resources.Command, error) {
+	command := resources.NewCommand(name, args...)
 
 	config := &ssh.ClientConfig{
 		User:            "root",

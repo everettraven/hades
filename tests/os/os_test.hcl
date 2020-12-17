@@ -1,6 +1,6 @@
 unittest "OS Check Test without Version" {
     image = "bpalmer/ssh_test"
-    port = "9090"
+    port = "9091"
     containerName = "hades-os-test"
 
     run {
@@ -12,7 +12,7 @@ unittest "OS Check Test without Version" {
 
 unittest "OS Check Test with Version" {
     image = "bpalmer/ssh_test"
-    port = "9090"
+    port = "9091"
     containerName = "hades-os-test-version"
 
     run {
