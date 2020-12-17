@@ -1,22 +1,31 @@
-package command
+package os
 
 import (
-	"strings"
-
 	"testing"
+	"time"
 
 	"github.com/everettraven/hades/utils"
+	"golang.org/x/crypto/ssh"
+
+	"strings"
 )
 
-//TestCommand - Unit test the command function
-func TestCommand(t *testing.T) {
+func TestOS(t *testing.T) {
 	t.Log("Parsing test HCL file")
 	// Parse the tests from the HCL file
-	unitTests, err := utils.ParseUnitTests("command_test.hcl")
+	unitTests, err := utils.ParseUnitTests("os_test.hcl")
 
 	// Make sure we didn't hit any errors while parsing the HCL file
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	// Set up the SSH config for testing
+	config := &ssh.ClientConfig{
+		User:            "root",
+		Auth:            []ssh.AuthMethod{ssh.Password("root")},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         30 * time.Second,
 	}
 
 	// Loop through all the tests we parsed
@@ -67,31 +76,34 @@ func TestCommand(t *testing.T) {
 		t.Logf("SSH is running in the container")
 
 		// Actual test implementation
-		//--------------------------------------------------------------------------------------
+		//-----------------------------------------------------------------------------------------------------
 
-		// Loop through all the command blocks in the test
-		for j := 0; j < len(curTest.Run.Cmd); j++ {
-			// Attempt to run the "remote" command
-			arguments := strings.Join(curTest.Run.Cmd[j].Arguments, " ")
-			command, err := TestRemoteCommand("127.0.0.1", curTest.Port, curTest.Run.Cmd[j].Name, arguments)
+		// Get the details from the operating system on the remote machine
+		osDetails, err := utils.GetRemoteOS("127.0.0.1", curTest.Port, config)
 
-			// If we encountered any errors lets handle it.
-			if err != nil {
-				// Set the failure message
-				t.Fatalf(err.Error())
-			} else {
-				testOutput := strings.TrimSpace(command.Stdout.String())
-				// Check to see if the output from running the command matches the expected output
-				if testOutput != curTest.Run.Cmd[j].ExpectedOutput {
-					// Set the failure message
-					t.Errorf("Output of the test did not match the Expected Output (Output: %s | Expected: %s)", testOutput, curTest.Run.Cmd[j].ExpectedOutput)
-				} else {
-					t.Logf("Command \"%s\" - Passed", command.Name+" "+arguments)
-				}
+		// Check for any errors
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		// Parse the returned OS info for the distro and version
+		details := strings.Split(osDetails, ":")
+		distro := details[0]
+		version := details[1]
+
+		// test to see if it matches the expected distro
+		if strings.ToLower(curTest.Run.Os.DistributionID) != strings.ToLower(distro) {
+			t.Errorf("OS of the remote machine does not match the expected value: Remote OS: %s", distro)
+		}
+
+		// test to see if it matches the expected version
+		if curTest.Run.Os.Version != "" {
+			if strings.ToLower(curTest.Run.Os.Version) != strings.ToLower(version) {
+				t.Errorf("OS version of the remote machine does not match the expected value: Remote OS Version: %s", version)
 			}
 		}
 
-		//--------------------------------------------------------------------------------------
+		//-----------------------------------------------------------------------------------------------------
 
 		t.Logf("Stopping Docker Container %s", curTest.ContainerName)
 		if err = curTest.StopContainer(); err != nil {
