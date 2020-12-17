@@ -14,4 +14,4 @@ Build instructions to come shortly.
 Thank you for your interest in contributing to hades! Take a look at the [contributing guidelines](.github/Contributing.MD) to see how to contribute.
 
 # License
-This project uses the [Apache License, Version 2](https://opensource.org/licenses/Apache-2.0).
+This project uses the [Apache License, Version 2](LICENSE).
