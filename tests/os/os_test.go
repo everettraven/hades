@@ -14,12 +14,14 @@ import (
 func TestOS(t *testing.T) {
 	t.Log("Parsing test HCL file")
 	// Parse the tests from the HCL file
-	unitTests, err := utils.ParseUnitTests("os_test.hcl")
+	parseOut, err := utils.Parse("os_test.hcl", utils.UnitTestHCLUtil{})
 
 	// Make sure we didn't hit any errors while parsing the HCL file
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	unitTests := parseOut.(utils.UnitTestHCLUtil)
 
 	// Set up the SSH config for testing
 	config := &ssh.ClientConfig{
@@ -78,19 +80,19 @@ func TestOS(t *testing.T) {
 
 		// Actual test implementation
 		//-----------------------------------------------------------------------------------------------------
+		client, err := utils.GetSSHClient("127.0.0.1", curTest.Port, config)
+
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
 
 		// Get the details from the operating system on the remote machine
-		osDetails, err := resources.GetRemoteOS("127.0.0.1", curTest.Port, config)
+		distro, version, err := resources.GetRemoteOS(client)
 
 		// Check for any errors
 		if err != nil {
 			t.Error(err.Error())
 		}
-
-		// Parse the returned OS info for the distro and version
-		details := strings.Split(osDetails, ":")
-		distro := details[0]
-		version := details[1]
 
 		// test to see if it matches the expected distro
 		if strings.ToLower(curTest.Run.Os.DistributionID) != strings.ToLower(distro) {

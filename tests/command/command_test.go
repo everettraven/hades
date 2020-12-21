@@ -12,12 +12,14 @@ import (
 func TestCommand(t *testing.T) {
 	t.Log("Parsing test HCL file")
 	// Parse the tests from the HCL file
-	unitTests, err := utils.ParseUnitTests("command_test.hcl")
+	parseOut, err := utils.Parse("command_test.hcl", utils.UnitTestHCLUtil{})
 
 	// Make sure we didn't hit any errors while parsing the HCL file
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	unitTests := parseOut.(utils.UnitTestHCLUtil)
 
 	// Loop through all the tests we parsed
 	for i := 0; i < len(unitTests.UnitTests); i++ {

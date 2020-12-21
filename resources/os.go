@@ -2,7 +2,6 @@ package resources
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -14,21 +13,13 @@ type OS struct {
 }
 
 //GetRemoteOS - Function to determine the operating system of the remote system
-func GetRemoteOS(host string, port string, config *ssh.ClientConfig) (string, error) {
+func GetRemoteOS(client *ssh.Client) (string, string, error) {
 	command := NewCommand("cat", "/etc/*-release")
 
-	endpoint := fmt.Sprintf("%s:%s", host, port)
-
-	client, err := ssh.Dial("tcp", endpoint, config)
+	err := command.RunRemote(client)
 
 	if err != nil {
-		return "", errors.New("Could not establish a connection to the specified host. Error: " + err.Error())
-	}
-
-	err = command.RunRemote(client)
-
-	if err != nil {
-		return "", errors.New("Could not properly run the remote command specified. Error: " + err.Error())
+		return "", "", errors.New("Could not properly run the remote command specified. Error: " + err.Error())
 	}
 
 	output := command.Stdout.String()
@@ -39,7 +30,5 @@ func GetRemoteOS(host string, port string, config *ssh.ClientConfig) (string, er
 
 	version := strings.TrimSpace(strings.Split(details[1], "=")[1])
 
-	output = distrib + ":" + version
-
-	return output, nil
+	return distrib, version, nil
 }
