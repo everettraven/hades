@@ -1,14 +1,24 @@
 # hades
 hades is an open source infrastructure testing tool written in Go.
 
-# Usage
-This tool is still in the very early stages of development, usage documentation will be added as the tool is developed.
-
 # Development
 This tool is still in the very early stages of development.
 
+# Usage
+Usage documentation will be added as the tool is developed.
+
 # Build
-Build instructions to come shortly.
+To build and install hades, simply clone the repository:
+```
+git clone https://github.com/everettraven/hades.git
+```
+
+change directory into the cloned repository:
+```
+cd hades
+```
+
+run `go install`
 
 # Contributing
 Thank you for your interest in contributing to hades! Take a look at the [contributing guidelines](.github/Contributing.MD) to see how to contribute.

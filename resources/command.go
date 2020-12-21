@@ -10,8 +10,8 @@ import (
 
 //Command - Struct to hold the command block from the HCL Parsing
 type Command struct {
-	Name           string   `hcl:"name"`
-	Arguments      []string `hcl:"args"`
+	Name           string   `hcl:"cmd"`
+	Arguments      []string `hcl:"args,optional"`
 	ExpectedOutput string   `hcl:"expectedOutput"`
 	Cmd            *exec.Cmd
 	Stdout, Stderr bytes.Buffer

@@ -5,13 +5,13 @@ unittest "Command Test" {
 
     run {
         command {
-            name = "echo"
+            cmd = "echo"
             args = ["Hello World!"]
             expectedOutput = "Hello World!"
         }
 
         command {
-            name = "service"
+            cmd = "service"
             args = ["ssh", "status"]
             expectedOutput = "* sshd is running"
         }
@@ -25,7 +25,7 @@ unittest "Command Test 2" {
 
     run {
         command {
-            name = "echo"
+            cmd = "echo"
             args = ["World Hello!"]
             expectedOutput = "World Hello!"
         }

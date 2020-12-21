@@ -5,6 +5,10 @@ import (
 )
 
 //TestMain - Function for running the unit tests for the program
-func TestMain(t *testing.T) {
+func TestMain(m *testing.M) {
+	m.Run()
+}
+
+func TestNothing(t *testing.T) {
 	t.Log("main test unimplemented")
 }

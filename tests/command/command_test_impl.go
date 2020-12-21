@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/everettraven/hades/resources"
+	"github.com/everettraven/hades/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -34,12 +35,10 @@ func TestRemoteCommand(host string, port string, name string, args ...string) (*
 		Timeout:         30 * time.Second,
 	}
 
-	endpoint := fmt.Sprintf("%s:%s", host, port)
-
-	client, err := ssh.Dial("tcp", endpoint, config)
+	client, err := utils.GetSSHClient(host, port, config)
 
 	if err != nil {
-		return command, errors.New("Could not establish a connection to the specified host. Error: " + err.Error())
+		return command, err
 	}
 
 	err = command.RunRemote(client)

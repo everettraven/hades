@@ -2,6 +2,8 @@ package utils
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 
 	"io"
@@ -12,18 +14,13 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/everettraven/hades/resources"
+	"golang.org/x/crypto/ssh"
 )
-
-//Command - get the Command type from resources
-type Command resources.Command
-
-//OS - get the OS type from resources
-type OS resources.OS
 
 // RunBlock is a struct to hold the data of a run block of a test
 type RunBlock struct {
-	Cmd []*Command `hcl:"command,block"`
-	Os  *OS        `hcl:"os,block"`
+	Cmd []*resources.Command `hcl:"command,block"`
+	Os  *resources.OS        `hcl:"os,block"`
 }
 
 // UnitTestUtil is a struct to hold our test data.
@@ -293,4 +290,17 @@ func (test *UnitTestUtil) SSHDRunning() (bool, error) {
 
 	// Return if SSHD is running or not
 	return running, nil
+}
+
+//GetSSHClient - utility function to get an ssh client from the host, port, and clientconfig passed into the function
+func GetSSHClient(host string, port string, config *ssh.ClientConfig) (*ssh.Client, error) {
+	endpoint := fmt.Sprintf("%s:%s", host, port)
+
+	client, err := ssh.Dial("tcp", endpoint, config)
+
+	if err != nil {
+		return client, errors.New("Could not establish a connection to the specified host. Error: " + err.Error())
+	}
+
+	return client, nil
 }
