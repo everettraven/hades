@@ -1,4 +1,4 @@
-# Example - Simple Command
+# Example - Multiple Tests
 This example showcases a host file and multiple test files to test multiple things on a remote server.
 
 # Recreate This Example
