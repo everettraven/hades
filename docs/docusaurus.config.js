@@ -1,8 +1,8 @@
 module.exports = {
   title: 'hades',
   tagline: 'The tagline of my site',
-  url: 'https://your-docusaurus-test-site.com',
-  baseUrl: '/',
+  url: 'https://everettraven.github.io',
+  baseUrl: '/hades/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/hades-logo-16.png',
