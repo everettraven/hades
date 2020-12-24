@@ -50,8 +50,8 @@ If you would like to use an SSH Key (preferred) over a password as shown in the 
 
 Create an SSH Key by running `ssh-keygen`
 
-If you are using Windows you can share the key to the Docker container using:
-```
+If you are using Windows you can share the key to the Docker container using powershell and running:
+```powershell
 type $env:USERPROFILE\.ssh\id_rsa.pub | ssh root@127.0.0.1 -p 5000 "cat >> .ssh/authorized_keys"
 ```
 
