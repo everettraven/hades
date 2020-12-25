@@ -186,9 +186,11 @@ func main() {
 			var sshClient *ssh.Client
 			var authMethod []ssh.AuthMethod
 
+			// Check if a password is given to determine the ssh AuthMethod to use
 			if pass != "" {
 				authMethod = []ssh.AuthMethod{ssh.Password(pass)}
 			} else {
+				// Get the key from the keyFile
 				key, err := ioutil.ReadFile(keyFile)
 
 				if err != nil {
@@ -196,6 +198,7 @@ func main() {
 					os.Exit(1)
 				}
 
+				// Get the signer from the private key
 				signer, err := ssh.ParsePrivateKey(key)
 
 				if err != nil {
@@ -203,9 +206,11 @@ func main() {
 					os.Exit(1)
 				}
 
+				// setup the auth method
 				authMethod = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 			}
 
+			// Get the SSH client based on the user command flag being passed in.
 			if user != "" {
 
 				sshClient, err = GetSSHClient(curHost.IP, curHost.Port, user, authMethod)
