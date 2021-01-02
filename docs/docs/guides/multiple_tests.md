@@ -7,6 +7,8 @@ This guide shows how to use hades with a simple test file that runs a very simpl
 
 This guide uses Docker to create a container that would simulate a remote machine running on your local machine. If you have an existing remote machine feel free to skip the Docker setup steps.
 
+This guide can also be run locally by passing the `--local` flag when running hades. It is important to note that this guide was made to run with the Docker container so some changes may need to be made in order for all the tests to pass when running them locally. If you are running it locally on a Windows system, changes will need to be made to the tests as the test commands on Windows results in a different output than the Ubuntu 20.04 Docker container.
+
 ## Docker Setup
 
 1. Make sure that you have docker installed by running:
@@ -111,10 +113,15 @@ host {
 ```
 If you wanted to run the tests on multiple hosts you can place multiple host blocks in the hosts file. hades will run all the tests on each of the hosts.
 
-## Run hades on the Remote System
+## Run hades
 Now that we have a simple test file created we can run hades to test the remote system. In this case we will run it on our Docker Container we created for this guide by running:
 ```
 hades --pass root
+```
+
+Run it locally (does not require authentication):
+```
+hades --local
 ```
 
 If you did not name the test directory **tests** you can let hades know what directory to use for getting the tests by running:
