@@ -1,3 +1,5 @@
+![Build Status](https://github.com/everettraven/hades/workflows/build/badge.svg)
+
 # hades
 hades is an open source infrastructure testing tool written in Go.
 
