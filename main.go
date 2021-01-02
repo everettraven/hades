@@ -24,6 +24,7 @@ var bof bool
 var dir string
 var testDir string
 var keyFile string
+var local bool
 
 func init() {
 	// Create the hosts flag
@@ -53,6 +54,8 @@ func init() {
 	} else {
 		flag.StringVar(&keyFile, "key-file", fmt.Sprintf("%s", os.Getenv("HOME")+"/.ssh/id_rsa"), "The key flag is used to set the path to the SSH Key to use when attempting to connect to a remote host.")
 	}
+
+	flag.BoolVar(&local, "local", false, "The local flag is used to run hades on the local system rather than on a remote system.")
 }
 
 func main() {
@@ -69,48 +72,53 @@ func main() {
 	// List of hosts
 	var hostList []utils.Host
 
-	// Check for a hosts HCL file
-	if hosts == "" {
-		var curDir string
-		var err error
-		if dir == "" {
-			// Get the current working directory
-			curDir, err = os.Getwd()
-			if err != nil {
-				fmt.Printf("Encountered an error when attempting to get the hosts file: %s\n", err.Error())
-				os.Exit(1)
-			}
-		} else {
-			// Set the working directory
-			curDir = dir
-		}
-
-		// Look for the hosts.hcl file
-		err = filepath.Walk(curDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
+	// See if it is meant to be run local
+	if !local {
+		// Check for a hosts HCL file
+		if hosts == "" {
+			var curDir string
+			var err error
+			if dir == "" {
+				// Get the current working directory
+				curDir, err = os.Getwd()
+				if err != nil {
+					fmt.Printf("Encountered an error when attempting to get the hosts file: %s\n", err.Error())
+					os.Exit(1)
+				}
+			} else {
+				// Set the working directory
+				curDir = dir
 			}
 
-			if !info.IsDir() && info.Name() == "hosts.hcl" {
-				temp, err := utils.Parse(path, utils.HostHCLUtil{})
+			// Look for the hosts.hcl file
+			err = filepath.Walk(curDir, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return err
 				}
 
-				hostList = temp.(utils.HostHCLUtil).Hosts
+				if !info.IsDir() && info.Name() == "hosts.hcl" {
+					temp, err := utils.Parse(path, utils.HostHCLUtil{})
+					if err != nil {
+						return err
+					}
+
+					hostList = temp.(utils.HostHCLUtil).Hosts
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				fmt.Printf("Encountered an error when attempting to get the hosts file: %s\n", err.Error())
+				os.Exit(1)
 			}
 
-			return nil
-		})
-
-		if err != nil {
-			fmt.Printf("Encountered an error when attempting to get the hosts file: %s\n", err.Error())
-			os.Exit(1)
+		} else {
+			// get a list of the hosts from the hosts flag
+			hostList = GetHosts(hosts)
 		}
-
 	} else {
-		// get a list of the hosts from the hosts flag
-		hostList = GetHosts(hosts)
+		hostList = GetHosts("local")
 	}
 
 	// Check for the test HCL file being passed into the command
@@ -179,17 +187,22 @@ func main() {
 				os.Exit(1)
 			}
 
-			// Print the current test running
-			fmt.Printf("Running Test: %s on %s\n", test.Title, curHost.IP+":"+curHost.Port)
+			if local {
+				// Print the current test running
+				fmt.Printf("Running Test: %s on %s\n", test.Title, curHost.IP)
+			} else {
+				// Print the current test running
+				fmt.Printf("Running Test: %s on %s\n", test.Title, curHost.IP+":"+curHost.Port)
+			}
 
 			// Get the ssh client
 			var sshClient *ssh.Client
 			var authMethod []ssh.AuthMethod
 
 			// Check if a password is given to determine the ssh AuthMethod to use
-			if pass != "" {
+			if pass != "" && !local {
 				authMethod = []ssh.AuthMethod{ssh.Password(pass)}
-			} else {
+			} else if pass == "" && !local {
 				// Get the key from the keyFile
 				key, err := ioutil.ReadFile(keyFile)
 
@@ -211,7 +224,7 @@ func main() {
 			}
 
 			// Get the SSH client based on the user command flag being passed in.
-			if user != "" {
+			if user != "" && !local {
 
 				sshClient, err = GetSSHClient(curHost.IP, curHost.Port, user, authMethod)
 
@@ -219,26 +232,26 @@ func main() {
 					fmt.Println("Encountered an error when attempting to connect to the host specified: ", err.Error())
 					os.Exit(2)
 				}
-			} else if curHost.User != "" {
+			} else if curHost.User != "" && !local {
 				sshClient, err = GetSSHClient(curHost.IP, curHost.Port, curHost.User, authMethod)
 
 				if err != nil {
 					fmt.Println("Encountered an error when attempting to connect to the host specified: ", err.Error())
 					os.Exit(2)
 				}
-			} else {
+			} else if !local {
 				fmt.Println("No valid user was specified for this host. Skipping this host.")
 				continue
 			}
 
 			// Check if there are any command blocks that need to be run
 			if len(test.Cmds) > 0 {
-				failed = RunCommands(sshClient, test.Cmds)
+				failed = RunCommands(sshClient, test.Cmds, local)
 			}
 
 			// Check if there is an OS test block that needs to be run
 			if test.Os != nil {
-				failed = CheckOS(sshClient, *test.Os)
+				failed = CheckOS(sshClient, *test.Os, local)
 			}
 		}
 
@@ -267,16 +280,31 @@ func GetSSHClient(host string, port string, user string, auth []ssh.AuthMethod) 
 }
 
 //RunCommands - Function to run the command blocks in the test
-func RunCommands(sshClient *ssh.Client, cmds []*resources.Command) bool {
-
+func RunCommands(sshClient *ssh.Client, cmds []*resources.Command, local bool) bool {
+	var command *resources.Command
 	failed := false
 	// Loop through all the command blocks in the test
 	for j := 0; j < len(cmds); j++ {
 		// Attempt to run the "remote" command
 		arguments := strings.Join(cmds[j].Arguments, " ")
-		command := resources.NewCommand(cmds[j].Name, arguments)
 
-		err := command.RunRemote(sshClient)
+		if local {
+			if runtime.GOOS == "windows" {
+				command = resources.NewCommand("powershell", cmds[j].Name+" "+arguments)
+			} else {
+				command = resources.NewCommand(cmds[j].Name, arguments)
+			}
+		} else {
+			command = resources.NewCommand(cmds[j].Name, arguments)
+		}
+
+		var err error
+
+		if local {
+			err = command.RunLocal()
+		} else {
+			err = command.RunRemote(sshClient)
+		}
 
 		// If we encountered any errors lets handle it.
 		if err != nil {
@@ -332,11 +360,19 @@ func GetHosts(hosts string) []utils.Host {
 }
 
 // CheckOS - Function to check the OS of the system with the expected OS
-func CheckOS(sshClient *ssh.Client, os resources.OS) bool {
+func CheckOS(sshClient *ssh.Client, os resources.OS, local bool) bool {
 	failed := false
 
+	var distro string
+	var version string
+	var err error
+
 	// Get the Remote OS details
-	distro, version, err := resources.GetRemoteOS(sshClient)
+	if local {
+		distro, version, err = resources.GetLocalOS()
+	} else {
+		distro, version, err = resources.GetRemoteOS(sshClient)
+	}
 
 	if err != nil {
 		fmt.Printf("\tOS Test Failed - An Error Occured While Attempting to Get the Remote Machine's OS: %s\n", err.Error())
@@ -346,12 +382,14 @@ func CheckOS(sshClient *ssh.Client, os resources.OS) bool {
 	// Check that the distros match
 	if strings.ToLower(distro) != strings.ToLower(os.DistributionID) {
 		fmt.Printf("\tOS Test Failed - The Distribution of the Remote OS did not match the expected Distribution (Output: %s | Expected: %s)\n", distro, os.DistributionID)
+		failed = true
 	}
 
 	// Check that the version matches
 	if os.Version != "" {
 		if strings.ToLower(version) != strings.ToLower(os.Version) {
 			fmt.Printf("\tOS Test Failed - The Version of the Remote OS did not match the expected Version (Output: %s | Expected: %s)\n", version, os.Version)
+			failed = true
 		}
 	}
 
