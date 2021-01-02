@@ -32,12 +32,12 @@ func (c *Command) RunLocal() error {
 	c.Cmd.Stdout = &c.Stdout
 	c.Cmd.Stderr = &c.Stderr
 
-	_, err := exec.LookPath(c.Name)
+	lp, err := exec.LookPath(c.Name)
 
 	if err != nil {
 		return err
 	}
-
+	c.Cmd.Path = lp
 	err = c.Cmd.Run()
 
 	if err != nil {
