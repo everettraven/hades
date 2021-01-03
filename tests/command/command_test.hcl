@@ -1,7 +1,7 @@
-unittest "Command Test - Ubuntu" {
-    image = "bpalmer/ubuntu-base-ssh"
+unittest "Command Test" {
+    image = "bpalmer/ssh_test"
     port = "9090"
-    containerName = "hades-command-test-ubuntu"
+    containerName = "hades-command-test"
 
     run {
         command {
@@ -9,41 +9,19 @@ unittest "Command Test - Ubuntu" {
             args = ["Hello World!"]
             expectedOutput = "Hello World!"
         }
-    }
-}
 
-unittest "Command Test - Fedora" {
-    image = "bpalmer/fedora-base-ssh"
-    port = "9090"
-    containerName = "hades-command-test-fedora"
-
-    run {
         command {
-            cmd = "echo"
-            args = ["World Hello!"]
-            expectedOutput = "World Hello!"
+            cmd = "service"
+            args = ["ssh", "status"]
+            expectedOutput = "* sshd is running"
         }
     }
 }
 
-unittest "Command Test - CentOS" {
-    image = "bpalmer/centos-base-ssh"
+unittest "Command Test 2" {
+    image = "bpalmer/ssh_test"
     port = "9090"
-    containerName = "hades-command-test-centos"
-
-    run {
-        command {
-            cmd = "echo"
-            args = ["World Hello!"]
-            expectedOutput = "World Hello!"
-        }
-    }
-}
-
-unittest "Command Test - Alpine" {
-    image = "bpalmer/alpine-base-ssh"
-    port = "9090"
-    containerName = "hades-command-test-alpine"
+    containerName = "hades-command-test"
 
     run {
         command {
