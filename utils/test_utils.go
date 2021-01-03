@@ -250,13 +250,41 @@ func (test *UnitTestUtil) SSHDRunning() (bool, error) {
 		return false, err
 	}
 
-	resp, err := cli.ContainerTop(ctx, test.ContainerID, nil)
+	cmd := []string{"service", "ssh", "status"}
 
+	config := types.ExecConfig{
+		AttachStderr: true,
+		AttachStdout: true,
+		Cmd:          cmd,
+	}
+
+	// Create the exec command and run it
+	execID, err := cli.ContainerExecCreate(ctx, test.ContainerID, config)
+
+	// error check
 	if err != nil {
 		return false, err
 	}
 
-	if strings.Contains(resp.Processes[0][3], "sshd") {
+	// Get the details from the previously ran exec command
+	resp, err := cli.ContainerExecAttach(ctx, execID.ID, types.ExecStartCheck{})
+	defer cli.Close()
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	// get the output from the exec command until we hit a newline character
+	execOut, err := resp.Reader.ReadString('\n')
+
+	// error check
+	if err != nil {
+		return false, err
+	}
+
+	// check if the output contains "is running" to signify that the SSHD service is actually running within the container
+	if strings.Contains(execOut, "is running") {
 		running = true
 	}
 
